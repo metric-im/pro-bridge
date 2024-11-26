@@ -1,0 +1,16 @@
+.nginx/domains/*
+.nginx/nginx.conf
+.certs/*
+.http01-challenge/*
+.logs/*
+.idea
+node_modules
+jspm_packages
+test_modules
+.npm
+package-lock\.json
+yarn.lock
+.npmrc
+.env
+.vscode/
+.DS_Store
