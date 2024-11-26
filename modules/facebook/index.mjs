@@ -25,8 +25,7 @@ export default class Facebook {
             if (!req.account) return res.status(401).json({message: 'The user must be authenticated'})
 
             const fbUser = await this.collection.findOne({_id: req.account.userId})
-            console.log(fbUser)
-            return res.status(200).json(fbUser)
+            return res.status(fbUser != null ? 200 : 404).json(fbUser)
 
         })
 
@@ -49,9 +48,9 @@ export default class Facebook {
             const userToken  = userTokenRes.data
 
             const userRes = await this.graphApi.get('me', {params: {
-                access_token: userToken.access_token,
-                fields: 'id,email,name',
-            }})
+                    access_token: userToken.access_token,
+                    fields: 'id,email,name',
+                }})
 
             if (userRes.status !== 200) return res.status(userRes.status).json(userRes.data)
 
@@ -59,7 +58,7 @@ export default class Facebook {
 
             const adAccountsRes = await this.graphApi.get('me/adaccounts', {params: {
                     access_token: userToken.access_token,
-            }})
+                }})
 
             if (adAccountsRes.status !== 200) return res.status(adAccountsRes.status).json(adAccountsRes.data)
 
@@ -77,7 +76,7 @@ export default class Facebook {
                 _id: req.account.userId
             }
 
-            this.collection.insertOne(data)
+            await this.collection.insertOne(data)
 
             return res.status(200).json({message: 'success'})
         })
