@@ -1,28 +1,9 @@
 import Component from './Component.mjs';
 import {Button} from './Button.mjs';
 import API from './API.mjs';
+import Loader from './Loader.mjs';
 
 export default class FBButton extends Component {
-
-    prepareLoader() {
-        this.loader = this.div('loader', this.content)
-        const loaderImage = document.createElement('img')
-        loaderImage.src = '/assets/loader.gif'
-        loaderImage.style.width = '2rem'
-        this.loader.append(loaderImage)
-        this.loader.setAttribute('style', 'z-index:99;opacity:.5;background-color:var(--action-color-hilite);position:fixed;display:none;align-items:center;justify-content:center;top:0;bottom:0;right:0;left:0;')
-    }
-
-    startLoading() {
-        const loader = document.querySelector('.loader')
-        loader.style.display = 'flex'
-    }
-
-    stopLoading() {
-        const loader = document.querySelector('.loader')
-        loader.style.display = 'none'
-    }
-
 
     async getAppId() {
         if (this.appId) return this.appId
@@ -32,16 +13,15 @@ export default class FBButton extends Component {
     }
 
     async sendCode(code) {
-        this.startLoading()
+        this.loader.show()
         try {
-            const res = await API.put('/bridge/facebook/auth/callback', {code})
-
+            await API.put('/bridge/facebook/auth/callback', {code})
+            await this.render()
         } catch (e) {console.error(e)}
-        this.stopLoading()
-        await this.render()
+        this.loader.hide()
     }
 
-    async handleClick() {
+    async connectFacebook() {
         const redirectUri = 'http://localhost:3000/facebook-callback'
         const url = 'https://www.facebook.com/v21.0/dialog/oauth'
         const queries = new URLSearchParams({
@@ -84,6 +64,22 @@ export default class FBButton extends Component {
 
     }
 
+    async disconnectFacebook() {
+        try {
+            const answer = confirm('Do you really want to disconnect facebook account ?')
+            if (answer) {
+                await API.get('/bridge/facebook/auth/logout')
+                await this.render()
+            }
+
+        } catch (e) {
+            console.error(e)
+            await this.render()
+            window.toast.error('Something went wrong!')
+        }
+
+    }
+
     async getFbUser() {
         try {
             return await API.get('/bridge/facebook/auth/user')
@@ -92,15 +88,24 @@ export default class FBButton extends Component {
 
     async render(element) {
         await super.render(element);
-        this.prepareLoader()
-
+        this.loader = await this.draw(Loader, {}, this.element)
         const fbUser = await this.getFbUser()
+        console.log(fbUser)
 
-        await this.draw(Button, {
-            icon: 'facebook',
-            title: fbUser != undefined ? `Connected the account ${fbUser.name}` :  'Connect Facebook',
-            onClick: this.handleClick.bind(this),
-            disabled: fbUser != null,
-        }, this.element)
+        if (fbUser != null) {
+            console.log('111')
+            await this.draw(Button, {
+                icon: 'facebook',
+                title:'Disconnect Facebook Account ' + fbUser.name,
+                onClick: this.disconnectFacebook.bind(this),
+            }, this.element)
+        } else {
+            console.log('1112')
+            await this.draw(Button, {
+                icon: 'facebook',
+                title:'Connect Facebook',
+                onClick: this.connectFacebook.bind(this),
+            }, this.element)
+        }
     }
 }
