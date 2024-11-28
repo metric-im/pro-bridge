@@ -90,17 +90,14 @@ export default class FBButton extends Component {
         await super.render(element);
         this.loader = await this.draw(Loader, {}, this.element)
         const fbUser = await this.getFbUser()
-        console.log(fbUser)
 
         if (fbUser != null) {
-            console.log('111')
             await this.draw(Button, {
                 icon: 'facebook',
                 title:'Disconnect Facebook Account ' + fbUser.name,
                 onClick: this.disconnectFacebook.bind(this),
             }, this.element)
         } else {
-            console.log('1112')
             await this.draw(Button, {
                 icon: 'facebook',
                 title:'Connect Facebook',
