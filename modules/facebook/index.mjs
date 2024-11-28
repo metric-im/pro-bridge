@@ -39,7 +39,7 @@ export default class Facebook {
             if (!req.account) return res.status(401).json({message: 'The user must be authenticated'})
 
             const code = req.body['code']
-            if (!code) res.status(400).json({message: 'The query param code is required'})
+            if (!code) return res.status(400).json({message: 'The query param code is required'})
 
             const userTokenParams = {
                 fb_exchange_token: code,
