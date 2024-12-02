@@ -77,7 +77,6 @@ export default class FBButton extends Component {
             await this.render()
             window.toast.error('Something went wrong!')
         }
-
     }
 
     async getFbUser() {
